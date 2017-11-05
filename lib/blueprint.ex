@@ -1,0 +1,2 @@
+defmodule Blueprint do
+end
