@@ -1,7 +1,7 @@
 defmodule Blueprint.Plot do
     alias Graphvix.{ Graph, Node, Edge, Cluster }
 
-    def call_graph(%Blueprint{ xref: xref }, app, opts \\ []) do
+    def call_graph(blueprint = %Blueprint{ xref: xref }, app, opts \\ []) do
         { :ok, graph } = :xref.q(xref, to_charlist("E | #{app}"))
 
         label = Keyword.get(opts, :labeler, &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1)))
@@ -35,5 +35,7 @@ defmodule Blueprint.Plot do
 
         Graph.save
         Graph.clear
+
+        blueprint
     end
 end
