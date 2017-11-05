@@ -1,21 +1,10 @@
 defmodule Blueprint.Plot do
     alias Graphvix.{ Graph, Node, Edge, Cluster }
 
-    def call_graph(path, app, opts \\ []) do
-        { :ok, xref } = :xref.start([])
-
-        File.ls!(path)
-        |> Enum.each(fn file ->
-            lib = Path.join(path, file)
-            if File.dir?(lib) do
-                :xref.add_application xref, to_charlist(lib)
-            end
-        end)
-
+    def call_graph(%Blueprint{ xref: xref }, app, opts \\ []) do
         { :ok, graph } = :xref.q(xref, to_charlist("E | #{app}"))
-        :xref.stop(xref)
 
-        label = Keyword.get(opts, :labeler, &Plot.Label.strip_namespace(Plot.Label.to_label(&1)))
+        label = Keyword.get(opts, :labeler, &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1)))
 
         Graph.new(:call_graph)
         nodes = Enum.reduce(graph, %{}, fn { a, b }, nodes ->
