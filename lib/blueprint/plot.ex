@@ -32,6 +32,18 @@ defmodule Blueprint.Plot do
             nodes
         end)
 
+        if Keyword.get(opts, :group, false) do
+            Enum.reduce(nodes, %{}, fn { { mod, _, _ }, node_id }, modules ->
+                case modules do
+                    %{ ^mod => nodes } -> %{ modules | mod => [node_id|nodes] }
+                    _ -> Map.put_new(modules, mod, [node_id])
+                end
+            end)
+            |> Enum.each(fn { _, nodes } ->
+                Cluster.new(nodes)
+            end)
+        end
+
         Graph.save
         Graph.clear
     end
