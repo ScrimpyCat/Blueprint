@@ -28,8 +28,9 @@ defmodule Blueprint.Plot do
                     _ -> Map.put_new(modules, mod, [node_id])
                 end
             end)
-            |> Enum.each(fn { _, nodes } ->
-                Cluster.new(nodes)
+            |> Enum.each(fn
+                { _, [_] } -> nil
+                { _, nodes } -> Cluster.new(nodes)
             end)
         end
 
