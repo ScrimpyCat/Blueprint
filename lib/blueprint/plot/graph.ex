@@ -8,6 +8,47 @@ defmodule Blueprint.Plot.Graph do
         end
     end
 
+    defp define_clusters(nodes, nil), do: nodes
+    defp define_clusters(nodes, :mod) do
+        Enum.reduce(nodes, %{}, fn
+            { { mod, _, _ }, node_id }, modules -> add_module(modules, mod, node_id)
+            { mod, node_id }, modules -> add_module(modules, mod, node_id)
+        end)
+        |> Enum.each(fn
+            { _, [_] } -> nil
+            { _, nodes } -> Graphvix.Cluster.new(nodes)
+        end)
+    end
+    defp define_clusters(nodes, :app) do
+        Enum.reduce(nodes, %{}, fn
+            { { mod, _, _ }, node_id }, modules ->
+                app = case to_string(mod) do
+                    "Elixir." <> m ->
+                        [app|_] = String.split(m, ".")
+                        app
+                    _ -> mod
+                end
+                add_module(modules, app, node_id)
+            { mod, node_id }, modules ->
+                app = case to_string(mod) do
+                    "Elixir." <> m ->
+                        [app|_] = String.split(m, ".")
+                        app
+                    _ -> mod
+                end
+                add_module(modules, app, node_id)
+        end)
+        |> Enum.each(fn
+            { _, [_] } -> nil
+            { _, nodes } -> Graphvix.Cluster.new(nodes)
+        end)
+    end
+    defp define_clusters(nodes, []), do: nodes
+    defp define_clusters(nodes, [h|t]) do
+        define_clusters(nodes, h)
+        define_clusters(nodes, t)
+    end
+
     def to_dot(graph, opts \\ []) do
         label = Keyword.get(opts, :labeler, &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1)))
 
@@ -26,16 +67,7 @@ defmodule Blueprint.Plot.Graph do
             nodes
         end)
 
-        if Keyword.get(opts, :group, false) do
-            Enum.reduce(nodes, %{}, fn
-                { { mod, _, _ }, node_id }, modules -> add_module(modules, mod, node_id)
-                { mod, node_id }, modules -> add_module(modules, mod, node_id)
-            end)
-            |> Enum.each(fn
-                { _, [_] } -> nil
-                { _, nodes } -> Graphvix.Cluster.new(nodes)
-            end)
-        end
+        define_clusters(nodes, opts[:group])
 
         dot = Graphvix.Graph.write
         Graphvix.Graph.clear
