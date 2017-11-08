@@ -49,6 +49,7 @@ defmodule Blueprint.Plot.Graph do
         define_clusters(nodes, t)
     end
 
+    @spec to_dot([{ any, any }], keyword()) :: String.t
     def to_dot(graph, opts \\ []) do
         label = Keyword.get(opts, :labeler, &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1)))
 
@@ -75,5 +76,6 @@ defmodule Blueprint.Plot.Graph do
         dot
     end
 
+    @spec save!(String.t, String.t) :: :ok | no_return
     def save!(dot, path \\ "graph.dot"), do: File.write!(path, dot)
 end
