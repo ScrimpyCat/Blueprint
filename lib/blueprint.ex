@@ -1,6 +1,8 @@
 defmodule Blueprint do
     defstruct [:xref]
 
+    @type t :: %Blueprint{ xref: pid }
+
     defp add_app(_, []), do: :ok
     defp add_app(xref, lib) when is_atom(lib), do: { :ok, _ } = :xref.add_application(xref, :code.lib_dir(lib))
     defp add_app(xref, path) when is_binary(path) do
@@ -23,6 +25,7 @@ defmodule Blueprint do
         add_app(xref, t)
     end
 
+    @spec new(atom | String.t | [atom | String.t]) :: Blueprint.t
     def new(path) do
         { :ok, xref } = :xref.start([])
 
@@ -31,5 +34,9 @@ defmodule Blueprint do
         %Blueprint{ xref: xref }
     end
 
-    def close(%Blueprint{ xref: xref }), do: :xref.stop(xref)
+    @spec close(Blueprint.t) :: :ok
+    def close(%Blueprint{ xref: xref }) do
+        :xref.stop(xref)
+        :ok
+    end
 end
