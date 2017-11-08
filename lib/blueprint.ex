@@ -1,4 +1,9 @@
 defmodule Blueprint do
+    @moduledoc """
+      A blueprint represents a collection of applications that
+      are used to understand how they work together.
+    """
+
     defstruct [:xref]
 
     @type t :: %Blueprint{ xref: pid }
@@ -25,6 +30,14 @@ defmodule Blueprint do
         add_app(xref, t)
     end
 
+    @doc """
+      Create a new blueprint.
+
+      Blueprints will represent any applications that are
+      added to them. Atoms are interpreted as library names,
+      while strings are expected to be valid paths to either
+      a library or a collection of libraries.
+    """
     @spec new(atom | String.t | [atom | String.t]) :: Blueprint.t
     def new(path) do
         { :ok, xref } = :xref.start([])
@@ -34,6 +47,9 @@ defmodule Blueprint do
         %Blueprint{ xref: xref }
     end
 
+    @doc """
+      Close an active blueprint.
+    """
     @spec close(Blueprint.t) :: :ok
     def close(%Blueprint{ xref: xref }) do
         :xref.stop(xref)
