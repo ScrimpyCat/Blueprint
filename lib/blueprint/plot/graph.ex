@@ -1,4 +1,9 @@
 defmodule Blueprint.Plot.Graph do
+    @moduledoc """
+      Convenient functions for building simple node dependency
+      graphs.
+    """
+
     defp add_node(nodes, node, label), do: Map.put_new(nodes, node, elem(Graphvix.Node.new(label: label.(node)), 0))
 
     defp add_module(modules, mod, node_id) do
@@ -49,6 +54,9 @@ defmodule Blueprint.Plot.Graph do
         define_clusters(nodes, t)
     end
 
+    @doc """
+      Convert a node graph into a DOT graph.
+    """
     @spec to_dot([{ any, any }], keyword()) :: String.t
     def to_dot(graph, opts \\ []) do
         label = Keyword.get(opts, :labeler, &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1)))
@@ -76,6 +84,9 @@ defmodule Blueprint.Plot.Graph do
         dot
     end
 
+    @doc """
+      Write the DOT graph to a file.
+    """
     @spec save!(String.t, String.t) :: :ok | no_return
     def save!(dot, path \\ "graph.dot"), do: File.write!(path, dot)
 end
