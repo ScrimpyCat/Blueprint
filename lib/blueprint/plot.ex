@@ -50,7 +50,10 @@ defmodule Blueprint.Plot do
     end
 
     @doc """
-      Create a function graph for the given application.
+      Create a function graph.
+
+      This can either be for the entire blueprint or for a given
+      application.
 
       Options can be provided to change the resulting graph. These
       options are any that are valid in `Blueprint.Plot.Graph.to_dot\2`
@@ -59,8 +62,22 @@ defmodule Blueprint.Plot do
       * `:detail` - Affects the level of detail of the generated
       graph. Valid values are `:high` or `:low`.
     """
-    @spec function_graph(Blueprint.t, atom, keyword()) :: Blueprint.t
-    def function_graph(blueprint = %Blueprint{ xref: xref }, app, opts \\ []) do
+    @spec function_graph(Blueprint.t, atom | keyword(), keyword()) :: Blueprint.t
+    def function_graph(blueprint, app_or_opts \\ [], opts \\ [])
+    def function_graph(blueprint = %Blueprint{ xref: xref }, opts, _) when is_list(opts) do
+        query = case Keyword.get(opts, :detail, :high) do
+            :low -> to_charlist("E ||| A")
+            :high -> to_charlist("E | A")
+        end
+
+        { :ok, graph } = :xref.q(xref, query)
+
+        Blueprint.Plot.Graph.to_dot(graph, opts)
+        |> Blueprint.Plot.Graph.save!("function_graph.dot")
+
+        blueprint
+    end
+    def function_graph(blueprint = %Blueprint{ xref: xref }, app, opts) do
         query = case Keyword.get(opts, :detail, :high) do
             :low -> to_charlist("E ||| #{app}")
             :high -> to_charlist("E | #{app}")
