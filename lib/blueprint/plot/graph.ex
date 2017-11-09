@@ -4,7 +4,7 @@ defmodule Blueprint.Plot.Graph do
       graphs.
     """
 
-    defp add_node(nodes, node, label), do: Map.put_new(nodes, node, elem(Graphvix.Node.new(label: label.(node)), 0))
+    defp add_node(nodes, node, label, styler), do: Map.put_new(nodes, node, elem(Graphvix.Node.new(Keyword.merge([label: label.(node)], styler.({ :node, { node, label } }))), 0))
 
     defp add_module(modules, mod, node_id) do
         case modules do
@@ -59,20 +59,21 @@ defmodule Blueprint.Plot.Graph do
     """
     @spec to_dot([{ any, any }], keyword()) :: String.t
     def to_dot(graph, opts \\ []) do
+        styler = Keyword.get(opts, :styler, fn _ -> [color: "black"] end)
         label = Keyword.get(opts, :labeler, &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1)))
 
         Graphvix.Graph.new(self())
         nodes = Enum.reduce(graph, %{}, fn { a, b }, nodes ->
             nodes = %{ ^a => node_a, ^b => node_b } = case nodes do
                 %{ ^a => _, ^b => _ } -> nodes
-                %{ ^a => _ } -> add_node(nodes, b, label)
-                %{ ^b => _ } -> add_node(nodes, a, label)
+                %{ ^a => _ } -> add_node(nodes, b, label, styler)
+                %{ ^b => _ } -> add_node(nodes, a, label, styler)
                 _ ->
-                    if(a != b, do: add_node(nodes, a, label), else: nodes)
-                    |> add_node(b, label)
+                    if(a != b, do: add_node(nodes, a, label, styler), else: nodes)
+                    |> add_node(b, label, styler)
             end
 
-            Graphvix.Edge.new(node_a, node_b, color: "black")
+            Graphvix.Edge.new(node_a, node_b, styler.({ :connection, { a, b } }))
             nodes
         end)
 
