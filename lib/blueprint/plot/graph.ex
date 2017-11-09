@@ -64,11 +64,11 @@ defmodule Blueprint.Plot.Graph do
         Graphvix.Graph.new(self())
         nodes = Enum.reduce(graph, %{}, fn { a, b }, nodes ->
             nodes = %{ ^a => node_a, ^b => node_b } = case nodes do
+                %{ ^a => _, ^b => _ } -> nodes
                 %{ ^a => _ } -> add_node(nodes, b, label)
                 %{ ^b => _ } -> add_node(nodes, a, label)
-                %{ ^a => _, ^b => _ } -> nodes
                 _ ->
-                    add_node(nodes, a, label)
+                    if(a != b, do: add_node(nodes, a, label), else: nodes)
                     |> add_node(b, label)
             end
 
