@@ -56,6 +56,17 @@ defmodule Blueprint.Plot.Graph do
 
     @doc """
       Convert a node graph into a DOT graph.
+
+      Options can be provided to change the resulting graph. These
+      options are:
+
+      * `:labeler` - A function of type `(any -> String.t)`, where
+      the node is passed to the function and is expected to
+      receive a string that will be used on the graph to label it
+      as a result.
+      * `:styler` - A function of type `(node_element | connection_element -> keyword())`
+      where `node_element` is of type `{ :node, { node :: any, label :: String.t } }`
+      and `connection_element` is of type `{ :connection, { node :: any, node :: any } }`.
     """
     @spec to_dot([{ any, any }], keyword()) :: String.t
     def to_dot(graph, opts \\ []) do
