@@ -1,4 +1,14 @@
 defmodule Blueprint.Plot do
+    @doc """
+      Create an application graph.
+
+      Options can be provided to change the resulting graph. These
+      options are any that are valid in `Blueprint.Plot.Graph.to_dot\2`
+      or any mentioned below:
+
+      * `:detail` - Affects the level of detail of the generated
+      graph. Valid values are `:high` or `:low`.
+    """
     @spec application_graph(Blueprint.t, keyword()) :: Blueprint.t
     def application_graph(blueprint = %Blueprint{ xref: xref }, opts \\ []) do
         query = case Keyword.get(opts, :detail, :high) do
@@ -14,6 +24,16 @@ defmodule Blueprint.Plot do
         blueprint
     end
 
+    @doc """
+      Create a module graph.
+
+      Options can be provided to change the resulting graph. These
+      options are any that are valid in `Blueprint.Plot.Graph.to_dot\2`
+      or any mentioned below:
+
+      * `:detail` - Affects the level of detail of the generated
+      graph. Valid values are `:high` or `:low`.
+    """
     @spec module_graph(Blueprint.t, keyword()) :: Blueprint.t
     def module_graph(blueprint = %Blueprint{ xref: xref }, opts \\ []) do
         query = case Keyword.get(opts, :detail, :high) do
@@ -29,6 +49,16 @@ defmodule Blueprint.Plot do
         blueprint
     end
 
+    @doc """
+      Create a call graph for the given application.
+
+      Options can be provided to change the resulting graph. These
+      options are any that are valid in `Blueprint.Plot.Graph.to_dot\2`
+      or any mentioned below:
+
+      * `:detail` - Affects the level of detail of the generated
+      graph. Valid values are `:high` or `:low`.
+    """
     @spec call_graph(Blueprint.t, atom, keyword()) :: Blueprint.t
     def call_graph(blueprint = %Blueprint{ xref: xref }, app, opts \\ []) do
         query = case Keyword.get(opts, :detail, :high) do
