@@ -27,6 +27,9 @@ defmodule Blueprint.Plot do
     @doc """
       Create a module graph.
 
+      This can either be for the entire blueprint or for a given
+      application.
+
       Options can be provided to change the resulting graph. These
       options are any that are valid in `Blueprint.Plot.Graph.to_dot\2`
       or any mentioned below:
@@ -34,11 +37,25 @@ defmodule Blueprint.Plot do
       * `:detail` - Affects the level of detail of the generated
       graph. Valid values are `:high` or `:low`.
     """
-    @spec module_graph(Blueprint.t, keyword()) :: Blueprint.t
-    def module_graph(blueprint = %Blueprint{ xref: xref }, opts \\ []) do
+    @spec module_graph(Blueprint.t, atom | keyword(), keyword()) :: Blueprint.t
+    def module_graph(blueprint, app_or_opts \\ [], opts \\ [])
+    def module_graph(blueprint = %Blueprint{ xref: xref }, opts, _) when is_list(opts) do
         query = case Keyword.get(opts, :detail, :high) do
             :low -> 'ME ||| A'
             :high -> 'ME | A'
+        end
+
+        { :ok, graph } = :xref.q(xref, query)
+
+        Blueprint.Plot.Graph.to_dot(graph, opts)
+        |> Blueprint.Plot.Graph.save!("module_graph.dot")
+
+        blueprint
+    end
+    def module_graph(blueprint = %Blueprint{ xref: xref }, app, opts) do
+        query = case Keyword.get(opts, :detail, :high) do
+            :low -> to_charlist("ME ||| #{app}")
+            :high -> to_charlist("ME | #{app}")
         end
 
         { :ok, graph } = :xref.q(xref, query)
@@ -66,8 +83,8 @@ defmodule Blueprint.Plot do
     def function_graph(blueprint, app_or_opts \\ [], opts \\ [])
     def function_graph(blueprint = %Blueprint{ xref: xref }, opts, _) when is_list(opts) do
         query = case Keyword.get(opts, :detail, :high) do
-            :low -> to_charlist("E ||| A")
-            :high -> to_charlist("E | A")
+            :low -> 'E ||| A'
+            :high -> 'E | A'
         end
 
         { :ok, graph } = :xref.q(xref, query)
