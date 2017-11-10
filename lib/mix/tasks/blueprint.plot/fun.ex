@@ -1,5 +1,36 @@
 defmodule Mix.Tasks.Blueprint.Plot.Fun do
     @shortdoc "Create a function graph"
+    @moduledoc """
+      Creates a function graph.
+
+        mix blueprint.plot.fun [APP] [--simple | --complex] [[--lib LIB | --path PATH] ...]
+
+      An `APP` name is provided if the function graph should be
+      limited to the given application. Otherwise it will be
+      for the entire blueprint (libraries tracked).
+
+      A `--simple` or `--complex` option can be used to indicate
+      the detail of the generated graph.
+
+      As many `--lib` or `--path` options can be provided to
+      add additional libraries to the blueprint. If none are
+      provided, the blueprint will default to using the
+      libraries found in the project's build directory.
+
+      ## Examples
+
+      Generate a graph for the current project:
+        mix blueprint.plot.fun
+
+      Generate a graph for the current project's `example` application:
+        mix blueprint.plot.fun example
+
+      Generate a graph for the provided libraries:
+        mix blueprint.plot.fun --lib example1 --lib example2 --path /example
+
+      Generate a simple graph of mnesia from the standard erlang runtime:
+        mix blueprint.plot.fun --path $(elixir -e 'IO.puts :code.lib_dir') --simple mnesia
+    """
 
     use Mix.Task
 
