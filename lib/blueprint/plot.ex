@@ -3,7 +3,7 @@ defmodule Blueprint.Plot do
       Create an application graph.
 
       Options can be provided to change the resulting graph. These
-      options are any that are valid in `Blueprint.Plot.Graph.to_dot\2`
+      options are any that are valid in `Blueprint.Plot.Graph.to_dot/2`
       or any mentioned below:
 
       * `:detail` - Affects the level of detail of the generated
@@ -31,7 +31,7 @@ defmodule Blueprint.Plot do
       application.
 
       Options can be provided to change the resulting graph. These
-      options are any that are valid in `Blueprint.Plot.Graph.to_dot\2`
+      options are any that are valid in `Blueprint.Plot.Graph.to_dot/2`
       or any mentioned below:
 
       * `:detail` - Affects the level of detail of the generated
@@ -73,7 +73,7 @@ defmodule Blueprint.Plot do
       application.
 
       Options can be provided to change the resulting graph. These
-      options are any that are valid in `Blueprint.Plot.Graph.to_dot\2`
+      options are any that are valid in `Blueprint.Plot.Graph.to_dot/2`
       or any mentioned below:
 
       * `:detail` - Affects the level of detail of the generated
