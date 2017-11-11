@@ -1,4 +1,4 @@
 defmodule BlueprintTest do
     use ExUnit.Case
-    doctest Plot
+    doctest Blueprint
 end
