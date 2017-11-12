@@ -4,7 +4,7 @@ defmodule Blueprint.Plot.Graph do
       graphs.
     """
 
-    defp add_node(nodes, node, label, styler), do: Map.put_new(nodes, node, elem(Graphvix.Node.new(Keyword.merge([label: label.(node)], styler.({ :node, { node, label } }))), 0))
+    defp add_node(nodes, node, label, styler), do: Map.put_new(nodes, node, elem(Graphvix.Node.new(Keyword.merge([label: label.(node)], styler.({ :node, node }))), 0))
 
     defp add_module(modules, mod, node_id) do
         case modules do
@@ -65,7 +65,7 @@ defmodule Blueprint.Plot.Graph do
       receive a string that will be used on the graph to label it
       as a result.
       * `:styler` - A function of type `(node_element | connection_element -> keyword())`
-      where `node_element` is of type `{ :node, { node :: any, label :: String.t } }`
+      where `node_element` is of type `{ :node, node :: any }`
       and `connection_element` is of type `{ :connection, { node :: any, node :: any } }`.
     """
     @spec to_dot([{ any, any }], keyword()) :: String.t
