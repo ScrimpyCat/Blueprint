@@ -3,10 +3,13 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
     @moduledoc """
       Creates a application graph.
 
-        mix blueprint.plot.app [--simple | --complex] [[--lib LIB | --path PATH] ...]
+        mix blueprint.plot.app [--simple | --complex] [--colour] [[--lib LIB | --path PATH] ...]
 
       A `--simple` or `--complex` option can be used to indicate
       the detail of the generated graph.
+
+      A '--colour' option can be used to generate a coloured
+      graph.
 
       As many `--lib` or `--path` options can be provided to
       add additional libraries to the blueprint. If none are
@@ -35,16 +38,26 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
     defp options({ :lib, [app|args] }, options = %{ libs: libs }) when is_list(libs), do: options(args, %{ options | libs: [String.to_atom(app)|options[:libs]]})
     defp options({ :path, [app|args] }, options), do: options(args, %{ options | libs: [app]})
     defp options({ :lib, [app|args] }, options), do: options(args, %{ options | libs: [String.to_atom(app)]})
-    defp options(["--simple"|args], options), do: options(args, %{ options | detail: :low })
-    defp options(["--complex"|args], options), do: options(args, %{ options | detail: :high })
+    defp options(["--simple"|args], options), do: options(args, %{ options | opts: Map.put(options[:opts], :detail, :low) })
+    defp options(["--complex"|args], options), do: options(args, %{ options | opts: Map.put(options[:opts], :detail, :high) })
+    defp options(["--colour"|args], options) do
+        opts = Map.put(options[:opts], :styler, fn
+            { :node, { mod, _, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label((mod))))]
+            { :node, mod } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
+            { :connection, { { mod, _, _ }, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
+            { :connection, { mod, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
+            _ -> [color: "black"]
+        end)
+        options(args, %{ options | opts: opts })
+    end
 
     def run(args) do
         { :ok, _ } = :application.ensure_all_started(:graphvix)
 
-        options = options(args, %{ libs: Path.join(Mix.Project.build_path(), "lib"), detail: :high })
+        options = options(args, %{ libs: Path.join(Mix.Project.build_path(), "lib"), opts: %{} })
         blueprint = Blueprint.new(options[:libs])
 
-        Blueprint.Plot.application_graph(blueprint, detail: options[:detail])
+        Blueprint.Plot.application_graph(blueprint, Keyword.new(options[:opts]))
 
         Blueprint.close(blueprint)
     end
