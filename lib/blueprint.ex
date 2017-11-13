@@ -4,15 +4,21 @@ defmodule Blueprint do
       are used to understand how they work together.
     """
 
-    defstruct [:xref]
+    defstruct [:xref, :apps]
 
     @type t :: %Blueprint{ xref: pid }
 
-    defp add_app(_, []), do: :ok
-    defp add_app(xref, lib) when is_atom(lib), do: { :ok, _ } = :xref.add_application(xref, :code.lib_dir(lib))
-    defp add_app(xref, path) when is_binary(path) do
+    defp load_app(xref, path) do
+        { :ok, _ } = :xref.add_application(xref, to_charlist(path))
+        Blueprint.Application.new(path)
+    end
+
+    defp add_app(xref, paths, apps \\ [])
+    defp add_app(_, [], apps), do: apps
+    defp add_app(xref, lib, apps) when is_atom(lib), do: [load_app(xref, to_string(:code.lib_dir(lib)))|apps]
+    defp add_app(xref, path, apps) when is_binary(path) do
         if File.exists?(Path.join(path, "ebin")) do
-            { :ok, _ } = :xref.add_application(xref, to_charlist(path))
+            [load_app(xref, path)|apps]
         else
             Path.wildcard(Path.join(path, "*/ebin"))
             |> Enum.each(fn ebin ->
@@ -20,15 +26,12 @@ defmodule Blueprint do
                 <<lib :: binary-size(length), "ebin">> = ebin
 
                 if File.dir?(lib) do
-                    { :ok, _ } = :xref.add_application(xref, to_charlist(lib))
+                    [load_app(xref, lib)|apps]
                 end
             end)
         end
     end
-    defp add_app(xref, [h|t]) do
-        add_app(xref, h)
-        add_app(xref, t)
-    end
+    defp add_app(xref, [h|t], apps), do: add_app(xref, t, add_app(xref, h, apps))
 
     @doc """
       Create a new blueprint.
@@ -42,9 +45,7 @@ defmodule Blueprint do
     def new(path) do
         { :ok, xref } = :xref.start([])
 
-        add_app(xref, path)
-
-        %Blueprint{ xref: xref }
+        %Blueprint{ xref: xref, apps: add_app(xref, path) }
     end
 
     @doc """
