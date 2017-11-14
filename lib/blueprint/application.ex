@@ -1,6 +1,9 @@
 defmodule Blueprint.Application do
     defstruct [:path, :app, :modules]
 
+    @type t :: %Blueprint.Application{ path: String.t, app: atom, modules: [Blueprint.Application.Module.t] }
+
+    @spec new(String.t) :: t
     def new(path) do
         ebin_path = Path.join(path, "ebin")
 
