@@ -1,6 +1,9 @@
 defmodule Blueprint.Application.Module do
     defstruct [path: nil, beam: nil, name: nil, messages: [], server: nil]
 
+    @type server :: { :named, atom } | nil
+    @type t :: %Blueprint.Application.Module{ path: String.t, beam: binary, name: atom, messages: [Blueprint.Application.Module.Message.t], server: server }
+
     defp messages(code, messages \\ [])
     defp messages({ :call, _, { :remote, _, { :atom, _, GenServer }, { :atom, _, fun } }, args = [{ :atom, _ , server }|_] }, messages) when fun in [:call, :cast] do
         [%Blueprint.Application.Module.Message{
@@ -13,6 +16,7 @@ defmodule Blueprint.Application.Module do
     defp messages(code, messages) when is_tuple(code), do: messages(Tuple.to_list(code), messages)
     defp messages(_, messages), do: messages
 
+    @spec new(String.t) :: t
     def new(path) do
         { :ok, beam } = File.read(path)
         { :ok, { mod, [atoms: atoms] } } = :beam_lib.chunks(beam, [:atoms])
