@@ -6,7 +6,7 @@ defmodule Blueprint do
 
     defstruct [:xref, :apps]
 
-    @type t :: %Blueprint{ xref: pid }
+    @type t :: %Blueprint{ xref: pid, apps: [Blueprint.Application.t] }
 
     defp load_app(xref, path) do
         { :ok, _ } = :xref.add_application(xref, to_charlist(path))
