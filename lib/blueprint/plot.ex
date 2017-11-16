@@ -1,4 +1,30 @@
 defmodule Blueprint.Plot do
+    defp add_post_fun(opts, op, fun) do
+        { _, opts } = Keyword.get_and_update(opts, op, fn
+            nil ->
+                labeler = &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1))
+                { nil, &(fun.(&1, labeler)) }
+            labeler -> { labeler, &(fun.(&1, labeler)) }
+        end)
+
+        opts
+    end
+
+    defp annotate(graph, _, []), do: graph
+    defp annotate(graph, blueprint, [h|t]), do: annotate(annotate(graph, blueprint, h), blueprint, t)
+    defp annotate({ graph, opts }, blueprint, :version) do
+        opts = add_post_fun(opts, :labeler, fn node, labeler ->
+            version = Enum.find_value(blueprint.apps, "", fn
+                %Blueprint.Application{ app: { :application, ^node, state } } -> to_string([?\n|state[:vsn]])
+                _ -> false
+            end)
+            labeler.(node) <> version
+        end)
+
+        { graph, opts }
+    end
+    defp annotate(graph, _, _), do: graph
+
     @doc """
       Create an application graph.
 
@@ -17,6 +43,12 @@ defmodule Blueprint.Plot do
         end
 
         { :ok, graph } = :xref.q(xref, query)
+
+        { graph, opts } = if opts[:annotate] do
+            annotate({ graph, opts }, blueprint, opts[:annotate])
+        else
+            { graph, opts }
+        end
 
         Blueprint.Plot.Graph.to_dot(graph, opts)
         |> Blueprint.Plot.Graph.save!("application_graph.dot")
@@ -47,6 +79,12 @@ defmodule Blueprint.Plot do
 
         { :ok, graph } = :xref.q(xref, query)
 
+        { graph, opts } = if opts[:annotate] do
+            annotate({ graph, opts }, blueprint, opts[:annotate])
+        else
+            { graph, opts }
+        end
+
         Blueprint.Plot.Graph.to_dot(graph, opts)
         |> Blueprint.Plot.Graph.save!("module_graph.dot")
 
@@ -59,6 +97,12 @@ defmodule Blueprint.Plot do
         end
 
         { :ok, graph } = :xref.q(xref, query)
+
+        { graph, opts } = if opts[:annotate] do
+            annotate({ graph, opts }, blueprint, opts[:annotate])
+        else
+            { graph, opts }
+        end
 
         Blueprint.Plot.Graph.to_dot(graph, opts)
         |> Blueprint.Plot.Graph.save!("module_graph.dot")
@@ -89,6 +133,12 @@ defmodule Blueprint.Plot do
 
         { :ok, graph } = :xref.q(xref, query)
 
+        { graph, opts } = if opts[:annotate] do
+            annotate({ graph, opts }, blueprint, opts[:annotate])
+        else
+            { graph, opts }
+        end
+
         Blueprint.Plot.Graph.to_dot(graph, opts)
         |> Blueprint.Plot.Graph.save!("function_graph.dot")
 
@@ -101,6 +151,12 @@ defmodule Blueprint.Plot do
         end
 
         { :ok, graph } = :xref.q(xref, query)
+
+        { graph, opts } = if opts[:annotate] do
+            annotate({ graph, opts }, blueprint, opts[:annotate])
+        else
+            { graph, opts }
+        end
 
         Blueprint.Plot.Graph.to_dot(graph, opts)
         |> Blueprint.Plot.Graph.save!("function_graph.dot")
