@@ -163,4 +163,28 @@ defmodule Blueprint.Plot do
 
         blueprint
     end
+
+    def message_graph(blueprint, opts \\ [])
+    def message_graph(blueprint, opts) do
+        graph = Enum.uniq(Enum.reduce(blueprint.apps, [], fn app, acc ->
+            Enum.reduce(app.modules, acc, fn
+                %Blueprint.Application.Module{ messages: [] }, acc -> acc
+                module, acc ->
+                    Enum.reduce(module.messages, acc, fn msg, acc ->
+                        [{ module.name, msg.target }|acc]
+                    end)
+            end)
+        end))
+
+        { graph, opts } = if opts[:annotate] do
+            annotate({ graph, opts }, blueprint, opts[:annotate])
+        else
+            { graph, opts }
+        end
+
+        Blueprint.Plot.Graph.to_dot(graph, opts)
+        |> Blueprint.Plot.Graph.save!("message_graph.dot")
+
+        blueprint
+    end
 end
