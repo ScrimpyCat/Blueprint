@@ -21,12 +21,14 @@ defmodule Blueprint do
             [load_app(xref, path)|apps]
         else
             Path.wildcard(Path.join(path, "*/ebin"))
-            |> Enum.each(fn ebin ->
+            |> Enum.reduce(apps, fn ebin, apps ->
                 length = round((bit_size(ebin) / 8) - 4)
                 <<lib :: binary-size(length), "ebin">> = ebin
 
                 if File.dir?(lib) do
                     [load_app(xref, lib)|apps]
+                else
+                    apps
                 end
             end)
         end
