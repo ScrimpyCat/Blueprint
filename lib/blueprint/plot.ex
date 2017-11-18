@@ -164,6 +164,15 @@ defmodule Blueprint.Plot do
         blueprint
     end
 
+    @doc """
+      Create a message graph.
+
+      This can either be for the entire blueprint or for a given
+      application.
+
+      Options can be provided to change the resulting graph. These
+      options are any that are valid in `Blueprint.Plot.Graph.to_dot/2`.
+    """
     @spec message_graph(Blueprint.t, atom | keyword(), keyword()) :: Blueprint.t
     def message_graph(blueprint, app_or_opts \\ [], opts \\ [])
     def message_graph(blueprint, opts, _) when is_list(opts) do
