@@ -164,8 +164,8 @@ defmodule Blueprint.Plot do
         blueprint
     end
 
-    def message_graph(blueprint, opts \\ [])
-    def message_graph(blueprint, opts) do
+    def message_graph(blueprint, app_or_opts \\ [], opts \\ [])
+    def message_graph(blueprint, opts, _) when is_list(opts) do
         graph = Enum.uniq(Enum.reduce(blueprint.apps, [], fn app, acc ->
             Enum.reduce(app.modules, acc, fn
                 %Blueprint.Application.Module{ messages: [] }, acc -> acc
@@ -175,6 +175,32 @@ defmodule Blueprint.Plot do
                     end)
             end)
         end))
+
+        { graph, opts } = if opts[:annotate] do
+            annotate({ graph, opts }, blueprint, opts[:annotate])
+        else
+            { graph, opts }
+        end
+
+        Blueprint.Plot.Graph.to_dot(graph, opts)
+        |> Blueprint.Plot.Graph.save!("message_graph.dot")
+
+        blueprint
+    end
+    def message_graph(blueprint, app, opts) do
+        graph =
+            Enum.find_value(blueprint.apps, [], fn
+                %Blueprint.Application{ app: { :application, ^app, _ }, modules: modules } -> modules
+                _ -> false
+            end)
+            |> Enum.reduce([], fn
+                %Blueprint.Application.Module{ messages: [] }, acc -> acc
+                module, acc ->
+                    Enum.reduce(module.messages, acc, fn msg, acc ->
+                        [{ module.name, msg.target }|acc]
+                    end)
+            end)
+            |> Enum.uniq
 
         { graph, opts } = if opts[:annotate] do
             annotate({ graph, opts }, blueprint, opts[:annotate])
