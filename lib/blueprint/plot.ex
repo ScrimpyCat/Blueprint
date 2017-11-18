@@ -164,6 +164,7 @@ defmodule Blueprint.Plot do
         blueprint
     end
 
+    @spec message_graph(Blueprint.t, atom | keyword(), keyword()) :: Blueprint.t
     def message_graph(blueprint, app_or_opts \\ [], opts \\ [])
     def message_graph(blueprint, opts, _) when is_list(opts) do
         graph = Enum.uniq(Enum.reduce(blueprint.apps, [], fn app, acc ->
