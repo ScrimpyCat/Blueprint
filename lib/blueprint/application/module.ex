@@ -4,11 +4,13 @@ defmodule Blueprint.Application.Module do
     @type server :: { :named, atom } | nil
     @type t :: %Blueprint.Application.Module{ path: String.t, beam: binary, name: atom, messages: [Blueprint.Application.Module.Message.t], server: server }
 
+    @server_behaviours [GenServer, GenEvent, GenStage, :gen_event, :gen_fsm, :gen_server, :gen_statem, :gen]
+    @server_behaviours_sends [:call, :cast]
     defp messages(code, messages \\ [])
-    defp messages({ :call, _, { :remote, _, { :atom, _, GenServer }, { :atom, _, fun } }, args = [{ :atom, _ , server }|_] }, messages) when fun in [:call, :cast] do
+    defp messages({ :call, _, { :remote, _, { :atom, _, module }, { :atom, _, fun } }, args = [{ :atom, _ , server }|_] }, messages) when module in @server_behaviours and fun in @server_behaviours_sends do
         [%Blueprint.Application.Module.Message{
             target: server,
-            interface: { GenServer, fun, length(args) },
+            interface: { module, fun, length(args) },
             args: args #TODO: format
         }|messages]
     end
@@ -21,7 +23,7 @@ defmodule Blueprint.Application.Module do
         { :ok, beam } = File.read(path)
         { :ok, { mod, [atoms: atoms] } } = :beam_lib.chunks(beam, [:atoms])
         if Enum.any?(atoms, fn
-            { _, GenServer } -> true
+            { _, module } when module in @server_behaviours -> true
             _ -> false
         end) do
             { :ok, { _, chunks } } = :beam_lib.chunks(beam, [:attributes, :abstract_code])
