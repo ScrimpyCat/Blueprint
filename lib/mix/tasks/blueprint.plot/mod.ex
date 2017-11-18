@@ -57,7 +57,7 @@ defmodule Mix.Tasks.Blueprint.Plot.Mod do
         end)
         options(args, %{ options | opts: opts })
     end
-    defp options([app|args], options), do: options(args, %{ options | app: app })
+    defp options([app|args], options), do: options(args, %{ options | app: String.to_atom(app) })
 
     def run(args) do
         { :ok, _ } = :application.ensure_all_started(:graphvix)
