@@ -1,19 +1,19 @@
 defmodule Blueprint.Plot do
-    defp add_post_fun(opts, op, fun) do
+    defp add_post_fun(opts, op, default, fun) do
         { _, opts } = Keyword.get_and_update(opts, op, fn
-            nil ->
-                labeler = &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1))
-                { nil, &(fun.(&1, labeler)) }
-            labeler -> { labeler, &(fun.(&1, labeler)) }
+            nil -> { nil, &(fun.(&1, default)) }
+            default -> { default, &(fun.(&1, default)) }
         end)
 
         opts
     end
 
+    defp default_labeler(), do: &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1))
+
     defp annotate(graph, _, []), do: graph
     defp annotate(graph, blueprint, [h|t]), do: annotate(annotate(graph, blueprint, h), blueprint, t)
     defp annotate({ graph, opts }, blueprint, :version) do
-        opts = add_post_fun(opts, :labeler, fn node, labeler ->
+        opts = add_post_fun(opts, :labeler, default_labeler(), fn node, labeler ->
             version = Enum.find_value(blueprint.apps, "", fn
                 %Blueprint.Application{ app: { :application, ^node, state } } -> to_string([?\n|state[:vsn]])
                 _ -> false
