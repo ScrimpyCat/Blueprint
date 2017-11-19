@@ -34,6 +34,10 @@ defmodule Blueprint.Plot do
 
       * `:detail` - Affects the level of detail of the generated
       graph. Valid values are `:high` or `:low`.
+      * `:annotate` - Any additional annotations to be made. Valid
+      values are an atom or list of atoms. The currently supported
+      annotation options are:
+        - `:version` - To display the application's version.
     """
     @spec application_graph(Blueprint.t, keyword()) :: Blueprint.t
     def application_graph(blueprint = %Blueprint{ xref: xref }, opts \\ []) do
