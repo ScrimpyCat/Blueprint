@@ -8,6 +8,15 @@ defmodule Blueprint.Plot do
         opts
     end
 
+    defp add_pre_fun(opts, op, default, fun) do
+        { _, opts } = Keyword.get_and_update(opts, op, fn
+            nil -> { nil, &(default.(&1, fun)) }
+            default -> { default, &(default.(&1, fun)) }
+        end)
+
+        opts
+    end
+
     defp default_labeler(), do: &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1))
 
     defp annotate(graph, _, []), do: graph
