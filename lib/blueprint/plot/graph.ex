@@ -54,6 +54,17 @@ defmodule Blueprint.Plot.Graph do
         define_clusters(nodes, t)
     end
 
+    defp define_nodes(nodes, a, b, label, styler) do
+        case nodes do
+            %{ ^a => _, ^b => _ } -> nodes
+            %{ ^a => _ } -> add_node(nodes, b, label, styler)
+            %{ ^b => _ } -> add_node(nodes, a, label, styler)
+            _ ->
+                if(a != b, do: add_node(nodes, a, label, styler), else: nodes)
+                |> add_node(b, label, styler)
+        end
+    end
+
     @doc """
       Convert a node graph into a DOT graph.
 
@@ -68,24 +79,23 @@ defmodule Blueprint.Plot.Graph do
       where `node_element` is of type `{ :node, node :: any }`
       and `connection_element` is of type `{ :connection, { node :: any, node :: any } }`.
     """
-    @spec to_dot([{ any, any }], keyword()) :: String.t
+    @spec to_dot([{ any, any } | { any, any, any }], keyword()) :: String.t
     def to_dot(graph, opts \\ []) do
         styler = Keyword.get(opts, :styler, fn _ -> [color: "black"] end)
         label = Keyword.get(opts, :labeler, &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1)))
 
         Graphvix.Graph.new(self())
-        nodes = Enum.reduce(graph, %{}, fn { a, b }, nodes ->
-            nodes = %{ ^a => node_a, ^b => node_b } = case nodes do
-                %{ ^a => _, ^b => _ } -> nodes
-                %{ ^a => _ } -> add_node(nodes, b, label, styler)
-                %{ ^b => _ } -> add_node(nodes, a, label, styler)
-                _ ->
-                    if(a != b, do: add_node(nodes, a, label, styler), else: nodes)
-                    |> add_node(b, label, styler)
-            end
+        nodes = Enum.reduce(graph, %{}, fn
+            connection = { a, b }, nodes ->
+                nodes = %{ ^a => node_a, ^b => node_b } = define_nodes(nodes, a, b, label, styler)
 
-            Graphvix.Edge.new(node_a, node_b, styler.({ :connection, { a, b } }))
-            nodes
+                Graphvix.Edge.new(node_a, node_b, styler.({ :connection, connection }))
+                nodes
+            connection = { a, b, _ }, nodes ->
+                nodes = %{ ^a => node_a, ^b => node_b } = define_nodes(nodes, a, b, label, styler)
+
+                Graphvix.Edge.new(node_a, node_b, styler.({ :connection, connection }))
+                nodes
         end)
 
         define_clusters(nodes, opts[:group])
