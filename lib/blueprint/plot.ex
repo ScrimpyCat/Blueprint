@@ -8,15 +8,6 @@ defmodule Blueprint.Plot do
         opts
     end
 
-    defp add_pre_fun(opts, op, default, fun) do
-        { _, opts } = Keyword.get_and_update(opts, op, fn
-            nil -> { nil, &(default.(&1, fun)) }
-            default -> { default, &(default.(&1, fun)) }
-        end)
-
-        opts
-    end
-
     defp default_labeler(), do: &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1))
 
     defp annotate(graph, _, []), do: graph
@@ -31,6 +22,24 @@ defmodule Blueprint.Plot do
         end)
 
         { graph, opts }
+    end
+    defp annotate({ graph, opts }, blueprint, :messages) do
+        messages = Enum.reduce(blueprint.apps, graph, fn app, acc ->
+            Enum.reduce(app.modules, acc, fn
+                %Blueprint.Application.Module{ messages: [] }, acc -> acc
+                module, acc ->
+                    Enum.reduce(module.messages, acc, fn msg, acc ->
+                        [{ module.name, msg.target, :message }|acc]
+                    end)
+            end)
+        end)
+
+        opts = add_post_fun(opts, :styler, fn _ -> [color: "black"] end, fn
+            node = { :connection, { _, _, :message } }, styler -> Keyword.merge([style: "dashed"], styler.(node))
+            node, styler -> styler.(node)
+        end)
+
+        { Enum.uniq(messages), opts }
     end
     defp annotate(graph, _, _), do: graph
 
