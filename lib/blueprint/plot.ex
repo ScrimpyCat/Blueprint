@@ -10,9 +10,9 @@ defmodule Blueprint.Plot do
 
     defp default_labeler(), do: &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1))
 
-    defp annotate(graph, _, []), do: graph
-    defp annotate(graph, blueprint, [h|t]), do: annotate(annotate(graph, blueprint, h), blueprint, t)
-    defp annotate({ graph, opts }, blueprint, :version) do
+    defp annotate(graph, _, [], _), do: graph
+    defp annotate(graph, blueprint, [h|t], mode), do: annotate(annotate(graph, blueprint, h, mode), blueprint, t, mode)
+    defp annotate({ graph, opts }, blueprint, :version, :application) do
         opts = add_post_fun(opts, :labeler, default_labeler(), fn node, labeler ->
             version = Enum.find_value(blueprint.apps, "", fn
                 %Blueprint.Application{ app: { :application, ^node, state } } -> to_string([?\n|state[:vsn]])
@@ -23,7 +23,7 @@ defmodule Blueprint.Plot do
 
         { graph, opts }
     end
-    defp annotate({ graph, opts }, blueprint, :messages) do
+    defp annotate({ graph, opts }, blueprint, :messages, :module) do
         messages = Enum.reduce(blueprint.apps, graph, fn app, acc ->
             Enum.reduce(app.modules, acc, fn
                 %Blueprint.Application.Module{ messages: [] }, acc -> acc
@@ -41,7 +41,7 @@ defmodule Blueprint.Plot do
 
         { Enum.uniq(messages), opts }
     end
-    defp annotate(graph, _, _), do: graph
+    defp annotate(graph, _, _, _), do: graph
 
     @doc """
       Create an application graph.
@@ -67,7 +67,7 @@ defmodule Blueprint.Plot do
         { :ok, graph } = :xref.q(xref, query)
 
         { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate])
+            annotate({ graph, opts }, blueprint, opts[:annotate], :application)
         else
             { graph, opts }
         end
@@ -102,7 +102,7 @@ defmodule Blueprint.Plot do
         { :ok, graph } = :xref.q(xref, query)
 
         { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate])
+            annotate({ graph, opts }, blueprint, opts[:annotate], :module)
         else
             { graph, opts }
         end
@@ -120,8 +120,8 @@ defmodule Blueprint.Plot do
 
         { :ok, graph } = :xref.q(xref, query)
 
-        { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate])
+        { graph, opts } = if opts[:annotate] do;
+            annotate({ graph, opts }, blueprint, opts[:annotate], :module)
         else
             { graph, opts }
         end
@@ -156,7 +156,7 @@ defmodule Blueprint.Plot do
         { :ok, graph } = :xref.q(xref, query)
 
         { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate])
+            annotate({ graph, opts }, blueprint, opts[:annotate], :function)
         else
             { graph, opts }
         end
@@ -175,7 +175,7 @@ defmodule Blueprint.Plot do
         { :ok, graph } = :xref.q(xref, query)
 
         { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate])
+            annotate({ graph, opts }, blueprint, opts[:annotate], :function)
         else
             { graph, opts }
         end
@@ -209,7 +209,7 @@ defmodule Blueprint.Plot do
         end))
 
         { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate])
+            annotate({ graph, opts }, blueprint, opts[:annotate], :message)
         else
             { graph, opts }
         end
@@ -235,7 +235,7 @@ defmodule Blueprint.Plot do
             |> Enum.uniq
 
         { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate])
+            annotate({ graph, opts }, blueprint, opts[:annotate], :message)
         else
             { graph, opts }
         end
