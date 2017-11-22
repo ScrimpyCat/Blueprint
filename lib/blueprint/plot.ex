@@ -23,6 +23,24 @@ defmodule Blueprint.Plot do
 
         { graph, opts }
     end
+    defp annotate({ graph, opts }, blueprint, :version, :module) do
+        opts = add_post_fun(opts, :labeler, default_labeler(), fn node, labeler ->
+            version = Enum.find_value(blueprint.apps, "", fn
+                %Blueprint.Application{ modules: modules } ->
+                    Enum.find_value(modules, fn
+                        %Blueprint.Application.Module{ name: ^node, beam: beam } ->
+                            { :ok, { _, [attributes: attributes ] } } = :beam_lib.chunks(beam, [:attributes])
+                            [vsn|_] = attributes[:vsn]
+                            "\n" <> to_string(vsn)
+                        _ -> false
+                    end)
+                _ -> false
+            end)
+            labeler.(node) <> version
+        end)
+
+        { graph, opts }
+    end
     defp annotate({ graph, opts }, blueprint, :messages, :application) do
         messages = Enum.reduce(blueprint.apps, graph, fn app, acc ->
             Enum.reduce(app.modules, acc, fn
@@ -121,6 +139,7 @@ defmodule Blueprint.Plot do
       * `:annotate` - Any additional annotations to be made. Valid
       values are an atom or list of atoms. The currently supported
       annotation options are:
+        - `:version` - To display the module's version.
         - `:messages` - To include messages sent between nodes.
 
     """
