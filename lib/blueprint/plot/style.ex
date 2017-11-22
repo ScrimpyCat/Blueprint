@@ -7,6 +7,7 @@ defmodule Blueprint.Plot.Style do
         end
     end
 
+    @spec colourize(String.t) :: String.t
     def colourize(name) do
         hue = round((case to_charlist(name) do
             [c1, c2|_] -> (value(c1) * 26) + value(c2)
