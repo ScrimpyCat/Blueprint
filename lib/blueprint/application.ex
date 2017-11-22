@@ -1,8 +1,21 @@
 defmodule Blueprint.Application do
+    @moduledoc """
+      A struct containing contents from an application useful for
+      inspecting.
+    """
+
     defstruct [:path, :app, :modules]
 
-    @type t :: %Blueprint.Application{ path: String.t, app: atom, modules: [Blueprint.Application.Module.t] }
+    @type app :: { :application, name :: atom, options :: keyword() }
+    @type t :: %Blueprint.Application{ path: String.t, app: app, modules: [Blueprint.Application.Module.t] }
 
+    @doc """
+      Load the contents of an application at the given path.
+
+      iex> { :application, app, _ } = Blueprint.Application.new(Mix.Project.app_path()).app
+      ...> app
+      :blueprint
+    """
     @spec new(String.t) :: t
     def new(path) do
         ebin_path = Path.join(path, "ebin")
