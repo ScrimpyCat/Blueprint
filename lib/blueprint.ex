@@ -8,17 +8,19 @@ defmodule Blueprint do
 
     @type t :: %Blueprint{ xref: pid, apps: [Blueprint.Application.t] }
 
-    defp load_app(xref, path) do
-        { :ok, _ } = :xref.add_application(xref, to_charlist(path))
-        Blueprint.Application.new(path)
+    defp load_app(xref, path, apps) do
+        case :xref.add_application(xref, to_charlist(path)) do
+            { :ok, _ } -> [Blueprint.Application.new(path)|apps]
+            _ -> apps
+        end
     end
 
     defp add_app(xref, paths, apps \\ [])
     defp add_app(_, [], apps), do: apps
-    defp add_app(xref, lib, apps) when is_atom(lib), do: [load_app(xref, to_string(:code.lib_dir(lib)))|apps]
+    defp add_app(xref, lib, apps) when is_atom(lib), do: load_app(xref, to_string(:code.lib_dir(lib)), apps)
     defp add_app(xref, path, apps) when is_binary(path) do
         if File.exists?(Path.join(path, "ebin")) do
-            [load_app(xref, path)|apps]
+            load_app(xref, path, apps)
         else
             Path.wildcard(Path.join(path, "*/ebin"))
             |> Enum.reduce(apps, fn ebin, apps ->
@@ -26,7 +28,7 @@ defmodule Blueprint do
                 <<lib :: binary-size(length), "ebin">> = ebin
 
                 if File.dir?(lib) do
-                    [load_app(xref, lib)|apps]
+                    load_app(xref, lib, apps)
                 else
                     apps
                 end
