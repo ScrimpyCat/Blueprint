@@ -1,4 +1,9 @@
 defmodule Blueprint.Application.Module do
+    @moduledoc """
+      A struct containing contents from a BEAM module useful for
+      inspecting.
+    """
+
     defstruct [path: nil, beam: nil, name: nil, messages: [], server: nil]
 
     @type server :: { :named, atom } | nil
@@ -18,6 +23,12 @@ defmodule Blueprint.Application.Module do
     defp messages(code, messages) when is_tuple(code), do: messages(Tuple.to_list(code), messages)
     defp messages(_, messages), do: messages
 
+    @doc """
+      Load the contents of a module at the given path.
+
+      iex> Blueprint.Application.Module.new(Path.join(Mix.Project.app_path(), "ebin/Elixir.Blueprint.Application.Module.beam")).name
+      Blueprint.Application.Module
+    """
     @spec new(String.t) :: t
     def new(path) do
         { :ok, beam } = File.read(path)
