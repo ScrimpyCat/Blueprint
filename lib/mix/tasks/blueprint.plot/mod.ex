@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Blueprint.Plot.Mod do
     @moduledoc """
       Creates a module graph.
 
-        mix blueprint.plot.mod [APP] [--simple | --complex] [--colour] [[--lib LIB | --path PATH] ...]
+        mix blueprint.plot.mod [APP] [--simple | --complex] [--colour] [[--lib LIB | --path PATH] ...] [--messages]
 
       An `APP` name is provided if the module graph should be
       limited to the given application. Otherwise it will be
@@ -19,6 +19,9 @@ defmodule Mix.Tasks.Blueprint.Plot.Mod do
       add additional libraries to the blueprint. If none are
       provided, the blueprint will default to using the
       libraries found in the project's build directory.
+
+      A `--messages` option can be used to generate connections
+      for messages sent between applications.
 
       ## Examples
 
@@ -47,12 +50,15 @@ defmodule Mix.Tasks.Blueprint.Plot.Mod do
     defp options({ :lib, [app|args] }, options), do: options(args, %{ options | libs: [String.to_atom(app)]})
     defp options(["--simple"|args], options), do: options(args, %{ options | opts: Map.put(options[:opts], :detail, :low) })
     defp options(["--complex"|args], options), do: options(args, %{ options | opts: Map.put(options[:opts], :detail, :high) })
+    defp options(["--messages"|args], options), do: options(args, %{ options | annotations: [:messages|options[:annotations]] })
     defp options(["--colour"|args], options) do
         opts = Map.put(options[:opts], :styler, fn
             { :node, { mod, _, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label((mod))))]
             { :node, mod } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
             { :connection, { { mod, _, _ }, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
             { :connection, { mod, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
+            { :connection, { { mod, _, _ }, _, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
+            { :connection, { mod, _, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
             _ -> [color: "black"]
         end)
         options(args, %{ options | opts: opts })
@@ -62,12 +68,12 @@ defmodule Mix.Tasks.Blueprint.Plot.Mod do
     def run(args) do
         { :ok, _ } = :application.ensure_all_started(:graphvix)
 
-        options = options(args, %{ libs: Path.join(Mix.Project.build_path(), "lib"), opts: %{}, app: nil })
+        options = options(args, %{ libs: Path.join(Mix.Project.build_path(), "lib"), opts: %{}, app: nil, annotations: [] })
         blueprint = Blueprint.new(options[:libs])
 
         case options do
-            %{ app: nil } -> Blueprint.Plot.module_graph(blueprint, Keyword.new(options[:opts]))
-            _ -> Blueprint.Plot.module_graph(blueprint, options[:app], Keyword.new(options[:opts]))
+            %{ app: nil } -> Blueprint.Plot.module_graph(blueprint, [{ :annotate, Enum.uniq(options[:annotations]) }|Keyword.new(options[:opts])])
+            _ -> Blueprint.Plot.module_graph(blueprint, options[:app], [{ :annotate, Enum.uniq(options[:annotations]) }|Keyword.new(options[:opts])])
         end
 
         Blueprint.close(blueprint)
