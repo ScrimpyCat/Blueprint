@@ -40,12 +40,15 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
     defp options({ :lib, [app|args] }, options), do: options(args, %{ options | libs: [String.to_atom(app)]})
     defp options(["--simple"|args], options), do: options(args, %{ options | opts: Map.put(options[:opts], :detail, :low) })
     defp options(["--complex"|args], options), do: options(args, %{ options | opts: Map.put(options[:opts], :detail, :high) })
+    defp options(["--messages"|args], options), do: options(args, %{ options | annotations: [:messages|options[:annotations]] })
     defp options(["--colour"|args], options) do
         opts = Map.put(options[:opts], :styler, fn
             { :node, { mod, _, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label((mod))))]
             { :node, mod } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
             { :connection, { { mod, _, _ }, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
             { :connection, { mod, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
+            { :connection, { { mod, _, _ }, _, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
+            { :connection, { mod, _, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(mod)))]
             _ -> [color: "black"]
         end)
         options(args, %{ options | opts: opts })
@@ -54,10 +57,10 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
     def run(args) do
         { :ok, _ } = :application.ensure_all_started(:graphvix)
 
-        options = options(args, %{ libs: Path.join(Mix.Project.build_path(), "lib"), opts: %{} })
+        options = options(args, %{ libs: Path.join(Mix.Project.build_path(), "lib"), opts: %{}, annotations: [] })
         blueprint = Blueprint.new(options[:libs])
 
-        Blueprint.Plot.application_graph(blueprint, Keyword.new(options[:opts]))
+        Blueprint.Plot.application_graph(blueprint, [{ :annotate, Enum.uniq(options[:annotations]) }|Keyword.new(options[:opts])])
 
         Blueprint.close(blueprint)
     end
