@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
     @moduledoc """
       Creates a application graph.
 
-        mix blueprint.plot.app [--simple | --complex] [--colour] [[--lib LIB | --path PATH] ...] [--messages]
+        mix blueprint.plot.app [--simple | --complex] [--colour] [[--lib LIB | --path PATH] ...] [--messages] [--version]
 
       A `--simple` or `--complex` option can be used to indicate
       the detail of the generated graph.
@@ -18,6 +18,9 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
 
       A `--messages` option can be used to generate connections
       for messages sent between applications.
+
+      A `--version` option can be used to include version numbers
+      in the application nodes.
 
       ## Examples
 
@@ -44,6 +47,7 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
     defp options(["--simple"|args], options), do: options(args, %{ options | opts: Map.put(options[:opts], :detail, :low) })
     defp options(["--complex"|args], options), do: options(args, %{ options | opts: Map.put(options[:opts], :detail, :high) })
     defp options(["--messages"|args], options), do: options(args, %{ options | annotations: [:messages|options[:annotations]] })
+    defp options(["--version"|args], options), do: options(args, %{ options | annotations: [:version|options[:annotations]] })
     defp options(["--colour"|args], options) do
         opts = Map.put(options[:opts], :styler, fn
             { :node, { mod, _, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label((mod))))]
