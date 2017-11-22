@@ -21,7 +21,10 @@ defmodule Mix.Tasks.Blueprint.Plot.Mod do
       libraries found in the project's build directory.
 
       A `--messages` option can be used to generate connections
-      for messages sent between applications.
+      for messages sent between modules.
+
+      A `--version` option can be used to include version numbers
+      in the module nodes.
 
       ## Examples
 
@@ -51,6 +54,7 @@ defmodule Mix.Tasks.Blueprint.Plot.Mod do
     defp options(["--simple"|args], options), do: options(args, %{ options | opts: Map.put(options[:opts], :detail, :low) })
     defp options(["--complex"|args], options), do: options(args, %{ options | opts: Map.put(options[:opts], :detail, :high) })
     defp options(["--messages"|args], options), do: options(args, %{ options | annotations: [:messages|options[:annotations]] })
+    defp options(["--version"|args], options), do: options(args, %{ options | annotations: [:version|options[:annotations]] })
     defp options(["--colour"|args], options) do
         opts = Map.put(options[:opts], :styler, fn
             { :node, { mod, _, _ } } -> [color: Blueprint.Plot.Style.colourize(Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label((mod))))]
