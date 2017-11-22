@@ -23,6 +23,33 @@ defmodule Blueprint.Plot do
 
         { graph, opts }
     end
+    defp annotate({ graph, opts }, blueprint, :messages, :application) do
+        messages = Enum.reduce(blueprint.apps, graph, fn app, acc ->
+            Enum.reduce(app.modules, acc, fn
+                %Blueprint.Application.Module{ messages: [] }, acc -> acc
+                module, acc ->
+                    Enum.reduce(module.messages, acc, fn msg, acc ->
+                        target = msg.target
+
+                        Enum.find_value(blueprint.apps, acc, fn target_app ->
+                            if Enum.any?(target_app.modules, fn
+                                %Blueprint.Application.Module{ name: ^target } -> true
+                                _ -> false
+                            end) do
+                                [{ elem(app.app, 1), elem(target_app.app, 1), :message }|acc]
+                            end
+                        end)
+                    end)
+            end)
+        end)
+
+        opts = add_post_fun(opts, :styler, fn _ -> [color: "black"] end, fn
+            node = { :connection, { _, _, :message } }, styler -> Keyword.merge([style: "dashed"], styler.(node))
+            node, styler -> styler.(node)
+        end)
+
+        { Enum.uniq(messages), opts }
+    end
     defp annotate({ graph, opts }, blueprint, :messages, :module) do
         messages = Enum.reduce(blueprint.apps, graph, fn app, acc ->
             Enum.reduce(app.modules, acc, fn
