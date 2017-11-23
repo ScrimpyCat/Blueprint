@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Blueprint.Plot.Mod do
     @moduledoc """
       Creates a module graph.
 
-        mix blueprint.plot.mod [APP] [--simple | --complex] [--colour] [[--lib LIB | --path PATH] ...] [--messages]
+        mix blueprint.plot.mod [APP] [--simple | --complex] [--colour] [--messages] [--version] [[--lib LIB | --path PATH] ...]
 
       An `APP` name is provided if the module graph should be
       limited to the given application. Otherwise it will be
@@ -12,19 +12,19 @@ defmodule Mix.Tasks.Blueprint.Plot.Mod do
       A `--simple` or `--complex` option can be used to indicate
       the detail of the generated graph.
 
-      A '--colour' option can be used to generate a coloured
+      A `--colour` option can be used to generate a coloured
       graph.
-
-      As many `--lib` or `--path` options can be provided to
-      add additional libraries to the blueprint. If none are
-      provided, the blueprint will default to using the
-      libraries found in the project's build directory.
 
       A `--messages` option can be used to generate connections
       for messages sent between modules.
 
       A `--version` option can be used to include version numbers
       in the module nodes.
+
+      As many `--lib` or `--path` options can be provided to
+      add additional libraries to the blueprint. If none are
+      provided, the blueprint will default to using the
+      libraries found in the project's build directory.
 
       ## Examples
 

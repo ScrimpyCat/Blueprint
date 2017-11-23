@@ -12,7 +12,7 @@ defmodule Mix.Tasks.Blueprint.Plot.Fun do
       A `--simple` or `--complex` option can be used to indicate
       the detail of the generated graph.
 
-      A '--colour' option can be used to generate a coloured
+      A `--colour` option can be used to generate a coloured
       graph.
 
       As many `--lib` or `--path` options can be provided to

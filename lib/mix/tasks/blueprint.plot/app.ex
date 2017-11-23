@@ -3,24 +3,24 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
     @moduledoc """
       Creates an application graph.
 
-        mix blueprint.plot.app [--simple | --complex] [--colour] [[--lib LIB | --path PATH] ...] [--messages] [--version]
+        mix blueprint.plot.app [--simple | --complex] [--colour] [--messages] [--version] [[--lib LIB | --path PATH] ...]
 
       A `--simple` or `--complex` option can be used to indicate
       the detail of the generated graph.
 
-      A '--colour' option can be used to generate a coloured
+      A `--colour` option can be used to generate a coloured
       graph.
-
-      As many `--lib` or `--path` options can be provided to
-      add additional libraries to the blueprint. If none are
-      provided, the blueprint will default to using the
-      libraries found in the project's build directory.
 
       A `--messages` option can be used to generate connections
       for messages sent between applications.
 
       A `--version` option can be used to include version numbers
       in the application nodes.
+
+      As many `--lib` or `--path` options can be provided to
+      add additional libraries to the blueprint. If none are
+      provided, the blueprint will default to using the
+      libraries found in the project's build directory.
 
       ## Examples
 

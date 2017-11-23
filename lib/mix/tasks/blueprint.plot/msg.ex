@@ -9,7 +9,7 @@ defmodule Mix.Tasks.Blueprint.Plot.Msg do
       limited to the given application. Otherwise it will be
       for the entire blueprint (libraries tracked).
 
-      A '--colour' option can be used to generate a coloured
+      A `--colour` option can be used to generate a coloured
       graph.
 
       As many `--lib` or `--path` options can be provided to
