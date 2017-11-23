@@ -26,8 +26,8 @@ defmodule Blueprint.Application.Module do
     @doc """
       Load the contents of a module at the given path.
 
-      iex> Blueprint.Application.Module.new(Path.join(Mix.Project.app_path(), "ebin/Elixir.Blueprint.Application.Module.beam")).name
-      Blueprint.Application.Module
+        iex> Blueprint.Application.Module.new(Path.join(Mix.Project.app_path(), "ebin/Elixir.Blueprint.Application.Module.beam")).name
+        Blueprint.Application.Module
     """
     @spec new(String.t) :: t
     def new(path) do

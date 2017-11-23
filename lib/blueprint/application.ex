@@ -12,9 +12,9 @@ defmodule Blueprint.Application do
     @doc """
       Load the contents of an application at the given path.
 
-      iex> { :application, app, _ } = Blueprint.Application.new(Mix.Project.app_path()).app
-      ...> app
-      :blueprint
+        iex> { :application, app, _ } = Blueprint.Application.new(Mix.Project.app_path()).app
+        ...> app
+        :blueprint
     """
     @spec new(String.t) :: t
     def new(path) do

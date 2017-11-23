@@ -14,14 +14,14 @@ defmodule Blueprint.Plot.Style do
     @doc """
       Produce a colour a given string.
 
-      iex> Blueprint.Plot.Style.colourize("Foo.Bar")
-      "#A6ff00"
+        iex> Blueprint.Plot.Style.colourize("Foo.Bar")
+        "#A6ff00"
 
-      iex> Blueprint.Plot.Style.colourize("Foo.Foo")
-      "#A6ff00"
+        iex> Blueprint.Plot.Style.colourize("Foo.Foo")
+        "#A6ff00"
 
-      iex> Blueprint.Plot.Style.colourize("Bar.Bar")
-      "#ff6A00"
+        iex> Blueprint.Plot.Style.colourize("Bar.Bar")
+        "#ff6A00"
     """
     @spec colourize(String.t) :: String.t
     def colourize(name) do
