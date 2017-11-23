@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Blueprint.Plot.App do
-    @shortdoc "Create a application graph"
+    @shortdoc "Create an application graph"
     @moduledoc """
-      Creates a application graph.
+      Creates an application graph.
 
         mix blueprint.plot.app [--simple | --complex] [--colour] [[--lib LIB | --path PATH] ...] [--messages] [--version]
 
