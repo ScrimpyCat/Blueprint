@@ -40,6 +40,18 @@ defmodule Blueprint.Plot.GraphTest do
         """) == Blueprint.Plot.Graph.to_dot([{ A, B }, { B, A }])
     end
 
+    test "A to B with meta field" do
+        assert String.trim("""
+        digraph G {
+          node_1 [label="A",color="black"];
+          node_2 [label="B",color="black"];
+
+          node_1 -> node_2 [color="black"];
+          node_1 -> node_2 [color="black"];
+        }
+        """) == Blueprint.Plot.Graph.to_dot([{ A, B, :test }, { A, B }])
+    end
+
     test "A to B custom colours" do
         assert String.trim("""
         digraph G {
@@ -52,6 +64,23 @@ defmodule Blueprint.Plot.GraphTest do
             { :node, A } -> [color: "red"]
             { :node, B } -> [color: "green"]
             { :connection, { A, B } } -> [color: "blue"]
+        end)
+    end
+
+    test "A to B custom colours with meta field" do
+        assert String.trim("""
+        digraph G {
+          node_1 [label="A",color="red"];
+          node_2 [label="B",color="green"];
+
+          node_1 -> node_2 [color="white"];
+          node_1 -> node_2 [color="blue"];
+        }
+        """) == Blueprint.Plot.Graph.to_dot([{ A, B, :test }, { A, B }], styler: fn
+            { :node, A } -> [color: "red"]
+            { :node, B } -> [color: "green"]
+            { :connection, { A, B } } -> [color: "blue"]
+            { :connection, { A, B, :test } } -> [color: "white"]
         end)
     end
 
