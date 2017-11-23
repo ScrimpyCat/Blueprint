@@ -12,7 +12,7 @@ defmodule Blueprint.Plot.Style do
     end
 
     @doc """
-      Produce a colour a given string.
+      Produce a colour for a given string.
 
         iex> Blueprint.Plot.Style.colourize("Foo.Bar")
         "#A6ff00"
