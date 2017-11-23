@@ -1,4 +1,9 @@
 defmodule Blueprint.Plot do
+    @moduledoc """
+      Convenience functions for creating different graphs from
+      a blueprint.
+    """
+
     defp add_post_fun(opts, op, default, fun) do
         { _, opts } = Keyword.get_and_update(opts, op, fn
             nil -> { nil, &(fun.(&1, default)) }
