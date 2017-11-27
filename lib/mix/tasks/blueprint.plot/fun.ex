@@ -62,7 +62,12 @@ defmodule Mix.Tasks.Blueprint.Plot.Fun do
     def run(args) do
         { :ok, _ } = :application.ensure_all_started(:graphvix)
 
-        options = options(args, %{ libs: Path.join(Mix.Project.build_path(), "lib"), opts: %{}, app: nil })
+        libs = case Code.ensure_loaded(Mix.Project) do
+            { :module, _ } -> Path.join(Mix.Project.build_path(), "lib")
+            _ -> []
+        end
+
+        options = options(args, %{ libs: libs, opts: %{}, app: nil })
         blueprint = Blueprint.new(options[:libs])
 
         case options do

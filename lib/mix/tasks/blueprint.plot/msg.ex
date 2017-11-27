@@ -57,8 +57,13 @@ defmodule Mix.Tasks.Blueprint.Plot.Msg do
     def run(args) do
         { :ok, _ } = :application.ensure_all_started(:graphvix)
 
+        libs = case Code.ensure_loaded(Mix.Project) do
+            { :module, _ } -> Path.join(Mix.Project.build_path(), "lib")
+            _ -> []
+        end
+
         options = options(args, %{
-            libs: Path.join(Mix.Project.build_path(), "lib"),
+            libs: libs,
             opts: %{
                 styler: fn
                     { :connection, _ } -> [color: "black", style: "dashed"]

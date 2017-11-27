@@ -64,7 +64,12 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
     def run(args) do
         { :ok, _ } = :application.ensure_all_started(:graphvix)
 
-        options = options(args, %{ libs: Path.join(Mix.Project.build_path(), "lib"), opts: %{}, annotations: [] })
+        libs = case Code.ensure_loaded(Mix.Project) do
+            { :module, _ } -> Path.join(Mix.Project.build_path(), "lib")
+            _ -> []
+        end
+
+        options = options(args, %{ libs: libs, opts: %{}, annotations: [] })
         blueprint = Blueprint.new(options[:libs])
 
         Blueprint.Plot.application_graph(blueprint, [{ :annotate, Enum.uniq(options[:annotations]) }|Keyword.new(options[:opts])])
