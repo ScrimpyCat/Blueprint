@@ -10,6 +10,7 @@ defmodule Blueprint.Mixfile do
             start_permanent: Mix.env == :prod,
             deps: deps(),
             package: package(),
+            escript: escript(),
             dialyzer: [plt_add_deps: :transitive]
         ]
     end
@@ -34,6 +35,13 @@ defmodule Blueprint.Mixfile do
             maintainers: ["Stefan Johnson"],
             licenses: ["BSD 2-Clause"],
             links: %{ "GitHub" => "https://github.com/ScrimpyCat/Blueprint" }
+        ]
+    end
+
+    defp escript do
+        [
+            main_module: Blueprint.CLI,
+            strip_beam: false
         ]
     end
 end
