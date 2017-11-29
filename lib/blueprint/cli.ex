@@ -13,7 +13,7 @@ defmodule Blueprint.CLI do
     def main(args \\ [])
     def main(["help"|command]), do: help(command)
     def main(["plot"|command]), do: plot(command)
-    def main(args), do: help()
+    def main(_), do: help()
 
     defp help(command  \\ ""), do: IO.puts Blueprint.CLI.Markdown.convert(get_docs(command))
 
@@ -42,7 +42,11 @@ defmodule Blueprint.CLI do
     defp get_docs(_), do: get_docs(__MODULE__)
 
     defp plot([graph|args]) when graph in @graphs do
-        module_for_command(Mix.Tasks.Blueprint.Plot, graph).run(args)
+        try do
+            module_for_command(Mix.Tasks.Blueprint.Plot, graph).run(args)
+        rescue
+            _ -> help(["plot", graph])
+        end
     end
     defp plot(_), do: help()
 end
