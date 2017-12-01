@@ -93,6 +93,30 @@ defmodule Blueprint.Plot do
     end
     defp annotate(graph, _, _, _), do: graph
 
+    defp write_graph(type, graph, blueprint, opts) do
+        { graph, opts } = if opts[:annotate] do
+            annotate({ graph, opts }, blueprint, opts[:annotate], type)
+        else
+            { graph, opts }
+        end
+
+        Blueprint.Plot.Graph.to_dot(graph, opts)
+        |> Blueprint.Plot.Graph.save!(to_string(type) <> "_graph.dot")
+
+        blueprint
+    end
+
+    defp query(xref, left, right, opts) do
+        query = case Keyword.get(opts, :detail, :high) do
+            :low -> to_charlist("#{left} ||| #{right}")
+            :high -> to_charlist("#{left} | #{right}")
+        end
+
+        { :ok, graph } = :xref.q(xref, query)
+
+        graph
+    end
+
     @doc """
       Create an application graph.
 
@@ -110,23 +134,7 @@ defmodule Blueprint.Plot do
     """
     @spec application_graph(Blueprint.t, keyword()) :: Blueprint.t
     def application_graph(blueprint = %Blueprint{ xref: xref }, opts \\ []) do
-        query = case Keyword.get(opts, :detail, :high) do
-            :low -> 'AE ||| A'
-            :high -> 'AE | A'
-        end
-
-        { :ok, graph } = :xref.q(xref, query)
-
-        { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate], :application)
-        else
-            { graph, opts }
-        end
-
-        Blueprint.Plot.Graph.to_dot(graph, opts)
-        |> Blueprint.Plot.Graph.save!("application_graph.dot")
-
-        blueprint
+        write_graph(:application, query(xref, "AE", "A", opts), blueprint, opts)
     end
 
     @doc """
@@ -151,42 +159,10 @@ defmodule Blueprint.Plot do
     @spec module_graph(Blueprint.t, atom | keyword(), keyword()) :: Blueprint.t
     def module_graph(blueprint, app_or_opts \\ [], opts \\ [])
     def module_graph(blueprint = %Blueprint{ xref: xref }, opts, _) when is_list(opts) do
-        query = case Keyword.get(opts, :detail, :high) do
-            :low -> 'ME ||| A'
-            :high -> 'ME | A'
-        end
-
-        { :ok, graph } = :xref.q(xref, query)
-
-        { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate], :module)
-        else
-            { graph, opts }
-        end
-
-        Blueprint.Plot.Graph.to_dot(graph, opts)
-        |> Blueprint.Plot.Graph.save!("module_graph.dot")
-
-        blueprint
+        write_graph(:module, query(xref, "ME", "A", opts), blueprint, opts)
     end
     def module_graph(blueprint = %Blueprint{ xref: xref }, app, opts) do
-        query = case Keyword.get(opts, :detail, :high) do
-            :low -> to_charlist("ME ||| #{app}")
-            :high -> to_charlist("ME | #{app}")
-        end
-
-        { :ok, graph } = :xref.q(xref, query)
-
-        { graph, opts } = if opts[:annotate] do;
-            annotate({ graph, opts }, blueprint, opts[:annotate], :module)
-        else
-            { graph, opts }
-        end
-
-        Blueprint.Plot.Graph.to_dot(graph, opts)
-        |> Blueprint.Plot.Graph.save!("module_graph.dot")
-
-        blueprint
+        write_graph(:module, query(xref, "ME", app, opts), blueprint, opts)
     end
 
     @doc """
@@ -205,42 +181,10 @@ defmodule Blueprint.Plot do
     @spec function_graph(Blueprint.t, atom | keyword(), keyword()) :: Blueprint.t
     def function_graph(blueprint, app_or_opts \\ [], opts \\ [])
     def function_graph(blueprint = %Blueprint{ xref: xref }, opts, _) when is_list(opts) do
-        query = case Keyword.get(opts, :detail, :high) do
-            :low -> 'E ||| A'
-            :high -> 'E | A'
-        end
-
-        { :ok, graph } = :xref.q(xref, query)
-
-        { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate], :function)
-        else
-            { graph, opts }
-        end
-
-        Blueprint.Plot.Graph.to_dot(graph, opts)
-        |> Blueprint.Plot.Graph.save!("function_graph.dot")
-
-        blueprint
+        write_graph(:function, query(xref, "E", "A", opts), blueprint, opts)
     end
     def function_graph(blueprint = %Blueprint{ xref: xref }, app, opts) do
-        query = case Keyword.get(opts, :detail, :high) do
-            :low -> to_charlist("E ||| #{app}")
-            :high -> to_charlist("E | #{app}")
-        end
-
-        { :ok, graph } = :xref.q(xref, query)
-
-        { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate], :function)
-        else
-            { graph, opts }
-        end
-
-        Blueprint.Plot.Graph.to_dot(graph, opts)
-        |> Blueprint.Plot.Graph.save!("function_graph.dot")
-
-        blueprint
+        write_graph(:function, query(xref, "E", app, opts), blueprint, opts)
     end
 
     @doc """
@@ -265,16 +209,7 @@ defmodule Blueprint.Plot do
             end)
         end))
 
-        { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate], :message)
-        else
-            { graph, opts }
-        end
-
-        Blueprint.Plot.Graph.to_dot(graph, opts)
-        |> Blueprint.Plot.Graph.save!("message_graph.dot")
-
-        blueprint
+        write_graph(:message, graph, blueprint, opts)
     end
     def message_graph(blueprint, app, opts) do
         graph =
@@ -291,15 +226,6 @@ defmodule Blueprint.Plot do
             end)
             |> Enum.uniq
 
-        { graph, opts } = if opts[:annotate] do
-            annotate({ graph, opts }, blueprint, opts[:annotate], :message)
-        else
-            { graph, opts }
-        end
-
-        Blueprint.Plot.Graph.to_dot(graph, opts)
-        |> Blueprint.Plot.Graph.save!("message_graph.dot")
-
-        blueprint
+        write_graph(:message, graph, blueprint, opts)
     end
 end
