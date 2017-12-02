@@ -10,8 +10,8 @@ defmodule Blueprint.Plot.Graph do
     @type graph :: [connection]
     @type labeler :: (graph_node -> String.t)
     @type styler :: ({ :node, graph_node } | { :connection, connection } -> keyword())
-    @type node_cache :: %{ optional(graph_node) => pos_integer }
-    @type cluster_type :: :app | :mod
+    @typep node_cache :: %{ optional(graph_node) => pos_integer }
+    @typep cluster_type :: :app | :mod
 
     @spec add_node(node_cache, graph_node, labeler, styler) :: node_cache
     defp add_node(nodes, node, label, styler), do: Map.put_new(nodes, node, elem(Graphvix.Node.new(Keyword.merge([label: label.(node)], styler.({ :node, node }))), 0))
