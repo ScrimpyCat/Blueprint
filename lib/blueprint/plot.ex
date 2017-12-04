@@ -4,6 +4,7 @@ defmodule Blueprint.Plot do
       a blueprint.
     """
 
+    @spec add_post_fun(keyword(), atom, fun(), ((any, fun()) -> any)) :: keyword()
     defp add_post_fun(opts, op, default, fun) do
         { _, opts } = Keyword.get_and_update(opts, op, fn
             nil -> { nil, &(fun.(&1, default)) }
@@ -13,8 +14,10 @@ defmodule Blueprint.Plot do
         opts
     end
 
+    @spec default_labeler() :: ((atom  | { atom, atom, integer }) -> String.t)
     defp default_labeler(), do: &Blueprint.Plot.Label.strip_namespace(Blueprint.Plot.Label.to_label(&1))
 
+    @spec annotate({ Blueprint.Plot.Graph.graph, keyword() }, Blueprint.t, [atom] | atom, atom) :: { Blueprint.Plot.Graph.graph, keyword() }
     defp annotate(graph, _, [], _), do: graph
     defp annotate(graph, blueprint, [h|t], mode), do: annotate(annotate(graph, blueprint, h, mode), blueprint, t, mode)
     defp annotate({ graph, opts }, blueprint, :version, :application) do
@@ -93,6 +96,7 @@ defmodule Blueprint.Plot do
     end
     defp annotate(graph, _, _, _), do: graph
 
+    @spec write_graph(atom, Blueprint.Plot.Graph.graph, Blueprint.t, keyword()) :: Blueprint.t
     defp write_graph(type, graph, blueprint, opts) do
         { graph, opts } = if opts[:annotate] do
             annotate({ graph, opts }, blueprint, opts[:annotate], type)
@@ -106,6 +110,7 @@ defmodule Blueprint.Plot do
         blueprint
     end
 
+    @spec query(pid, String.t | atom, String.t | atom, keyword()) :: Blueprint.Plot.Graph.graph
     defp query(xref, left, right, opts) do
         query = case Keyword.get(opts, :detail, :high) do
             :low -> to_charlist("#{left} ||| #{right}")
