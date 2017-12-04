@@ -105,7 +105,7 @@ defmodule Blueprint.Plot do
         end
 
         Blueprint.Plot.Graph.to_dot(graph, opts)
-        |> Blueprint.Plot.Graph.save!(to_string(type) <> "_graph.dot")
+        |> Blueprint.Plot.Graph.save!(opts[:name] || (to_string(type) <> "_graph.dot"))
 
         blueprint
     end
@@ -136,6 +136,7 @@ defmodule Blueprint.Plot do
       annotation options are:
         - `:version` - To display the application's version.
         - `:messages` - To include messages sent between nodes.
+      * `:name` - The name of the DOT file to be saved.
     """
     @spec application_graph(Blueprint.t, keyword()) :: Blueprint.t
     def application_graph(blueprint = %Blueprint{ xref: xref }, opts \\ []) do
@@ -159,7 +160,7 @@ defmodule Blueprint.Plot do
       annotation options are:
         - `:version` - To display the module's version.
         - `:messages` - To include messages sent between nodes.
-
+      * `:name` - The name of the DOT file to be saved.
     """
     @spec module_graph(Blueprint.t, atom | keyword(), keyword()) :: Blueprint.t
     def module_graph(blueprint, app_or_opts \\ [], opts \\ [])
@@ -182,6 +183,7 @@ defmodule Blueprint.Plot do
 
       * `:detail` - Affects the level of detail of the generated
       graph. Valid values are `:high` or `:low`.
+      * `:name` - The name of the DOT file to be saved.
     """
     @spec function_graph(Blueprint.t, atom | keyword(), keyword()) :: Blueprint.t
     def function_graph(blueprint, app_or_opts \\ [], opts \\ [])
@@ -199,7 +201,10 @@ defmodule Blueprint.Plot do
       application.
 
       Options can be provided to change the resulting graph. These
-      options are any that are valid in `Blueprint.Plot.Graph.to_dot/2`.
+      options are any that are valid in `Blueprint.Plot.Graph.to_dot/2`
+      or any mentioned below:
+
+      * `:name` - The name of the DOT file to be saved.
     """
     @spec message_graph(Blueprint.t, atom | keyword(), keyword()) :: Blueprint.t
     def message_graph(blueprint, app_or_opts \\ [], opts \\ [])
