@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
     @moduledoc """
       Creates an application graph.
 
-        mix blueprint.plot.app [--simple | --complex] [--colour] [--messages] [--version] [[--lib LIB | --path PATH] ...]
+        mix blueprint.plot.app [--simple | --complex] [--colour] [--messages] [--version] [[--lib LIB | --path PATH] ...] [-o PATH]
 
       A `--simple` or `--complex` option can be used to indicate
       the detail of the generated graph.
@@ -16,6 +16,8 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
 
       A `--version` option can be used to include version numbers
       in the application nodes.
+
+      A `-o` option can be used to specify the file to be written.
 
       As many `--lib` or `--path` options can be provided to
       add additional libraries to the blueprint. If none are
@@ -60,6 +62,8 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
         end)
         options(args, %{ options | opts: opts })
     end
+    defp options(["-o"|args], options), do: options({ :output, args }, options)
+    defp options({ :output, [path|args] }, options), do: options(args, %{ options | opts: Map.put(options[:opts], :name, path) })
 
     def run(args) do
         { :ok, _ } = :application.ensure_all_started(:graphvix)

@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Blueprint.Plot.Mod do
     @moduledoc """
       Creates a module graph.
 
-        mix blueprint.plot.mod [APP] [--simple | --complex] [--colour] [--messages] [--version] [[--lib LIB | --path PATH] ...]
+        mix blueprint.plot.mod [APP] [--simple | --complex] [--colour] [--messages] [--version] [[--lib LIB | --path PATH] ...] [-o PATH]
 
       An `APP` name is provided if the module graph should be
       limited to the given application. Otherwise it will be
@@ -20,6 +20,8 @@ defmodule Mix.Tasks.Blueprint.Plot.Mod do
 
       A `--version` option can be used to include version numbers
       in the module nodes.
+
+      A `-o` option can be used to specify the file to be written.
 
       As many `--lib` or `--path` options can be provided to
       add additional libraries to the blueprint. If none are
@@ -67,6 +69,8 @@ defmodule Mix.Tasks.Blueprint.Plot.Mod do
         end)
         options(args, %{ options | opts: opts })
     end
+    defp options(["-o"|args], options), do: options({ :output, args }, options)
+    defp options({ :output, [path|args] }, options), do: options(args, %{ options | opts: Map.put(options[:opts], :name, path) })
     defp options([app|args], options), do: options(args, %{ options | app: String.to_atom(app) })
 
     def run(args) do
