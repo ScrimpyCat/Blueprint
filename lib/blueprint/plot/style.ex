@@ -3,6 +3,7 @@ defmodule Blueprint.Plot.Style do
       Convenient functions for styling graphs.
     """
 
+    @spec value(integer) :: non_neg_integer
     defp value(c) do
         cond do
             c >= ?a and c <= ?z -> (c - ?a) + 1
