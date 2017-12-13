@@ -19,6 +19,6 @@ Installation
 ------------
 ```elixir
 defp deps do
-    [{ :blueprint, "~> 0.2.0" }]
+    [{ :blueprint, "~> 0.2.1" }]
 end
 ```
