@@ -3,5 +3,5 @@
   "graphvix": {:hex, :graphvix, "0.5.0", "ee4125d1f85d7121ac19b4029bafe9a36dc63186efea2aa279b3343ebfbd3211", [], [], "hexpm"},
   "html_entities": {:hex, :html_entities, "0.4.0", "f2fee876858cf6aaa9db608820a3209e45a087c5177332799592142b50e89a6b", [], [], "hexpm"},
   "parsey": {:hex, :parsey, "0.0.2", "40356be7a83d5b56a670266fb69c9a2f95f638d1ad28803610f833cee71cac33", [], [], "hexpm"},
-  "simple_markdown": {:hex, :simple_markdown, "0.3.1", "2989eb96ab6a8790572409fd83a759185f8737276f0639f24804119fc791ee4c", [:mix], [{:html_entities, "~> 0.3", [hex: :html_entities, repo: "hexpm", optional: false]}, {:parsey, "~> 0.0.2", [hex: :parsey, repo: "hexpm", optional: false]}], "hexpm"},
-  "simple_markdown_extension_cli": {:hex, :simple_markdown_extension_cli, "0.1.3", "f0420599a06becd5d7dcb794051e5cb6eba12594da157f2022f79e9fdb52d3e2", [:mix], [{:simple_markdown, "~> 0.3.0", [hex: :simple_markdown, repo: "hexpm", optional: false]}], "hexpm"}}
+  "simple_markdown": {:hex, :simple_markdown, "0.5.0", "28027dd11b8ae07d035015b8c102029b648125d8831933efc35819f1e74b7f35", [:mix], [{:html_entities, "~> 0.3", [hex: :html_entities, repo: "hexpm", optional: false]}, {:parsey, "~> 0.0.2", [hex: :parsey, repo: "hexpm", optional: false]}], "hexpm"},
+  "simple_markdown_extension_cli": {:hex, :simple_markdown_extension_cli, "0.1.4", "eae9833cdddb98f5c4534ebd4313ad8954ac555f001331c6d44bbf310210cbf9", [:mix], [{:simple_markdown, "~> 0.3", [hex: :simple_markdown, repo: "hexpm", optional: false]}], "hexpm"}}
