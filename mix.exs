@@ -24,7 +24,7 @@ defmodule Blueprint.Mixfile do
     defp deps do
         [
             { :graphvix, "~> 0.5.0" },
-            { :simple_markdown, "~> 0.3.1" },
+            { :simple_markdown, "~> 0.3" },
             { :simple_markdown_extension_cli, "~> 0.1.3" },
             { :ex_doc, "~> 0.18", only: :dev }
         ]
