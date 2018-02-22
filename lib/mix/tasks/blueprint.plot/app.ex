@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
     @moduledoc """
       Creates an application graph.
 
-        mix blueprint.plot.app [--simple | --complex] [--colour] [--messages] [--version] [[--lib LIB | --path PATH] ...] [-o PATH]
+        mix blueprint.plot.app [--simple | --complex] [--colour] [--messages] [--version] [[--lib LIB | --path PATH] ...] [--servers FILE] [-o PATH]
 
       A `--simple` or `--complex` option can be used to indicate
       the detail of the generated graph.
@@ -23,6 +23,11 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
       add additional libraries to the blueprint. If none are
       provided, the blueprint will default to using the
       libraries found in the project's build directory.
+
+      A `--servers` option can be used to specify the file to be
+      used for custom server matching expressions. For more
+      information see `Blueprint.Application.Module`. However this
+      file is expected to be elixir, rather than a string.
 
       ## Examples
 
@@ -62,6 +67,8 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
         end)
         options(args, %{ options | opts: opts })
     end
+    defp options(["--servers"|args], options), do: options({ :servers, args }, options)
+    defp options({ :servers, [file|args] }, options), do: options(args, Map.put(options, :servers, file))
     defp options(["-o"|args], options), do: options({ :output, args }, options)
     defp options({ :output, [path|args] }, options), do: options(args, %{ options | opts: Map.put(options[:opts], :name, path) })
 
@@ -74,6 +81,11 @@ defmodule Mix.Tasks.Blueprint.Plot.App do
         end
 
         options = options(args, %{ libs: libs, opts: %{}, annotations: [] })
+
+        if Map.has_key?(options, :servers) do
+            Application.put_env(:blueprint, :servers, File.read!(options[:servers]))
+        end
+
         blueprint = Blueprint.new(options[:libs])
 
         Blueprint.Plot.application_graph(blueprint, [{ :annotate, Enum.uniq(options[:annotations]) }|Keyword.new(options[:opts])])
