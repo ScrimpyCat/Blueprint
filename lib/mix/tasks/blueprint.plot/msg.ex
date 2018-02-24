@@ -84,6 +84,7 @@ defmodule Mix.Tasks.Blueprint.Plot.Msg do
             app: nil
         })
 
+        prev_state = Application.fetch_env(:blueprint, :servers)
         if Map.has_key?(options, :servers) do
             Application.put_env(:blueprint, :servers, File.read!(options[:servers]))
         end
@@ -96,5 +97,10 @@ defmodule Mix.Tasks.Blueprint.Plot.Msg do
         end
 
         Blueprint.close(blueprint)
+
+        case prev_state do
+            { :ok, state } -> Application.put_env(:blueprint, :servers, state)
+            _ -> Application.delete_env(:blueprint, :servers)
+        end
     end
 end
