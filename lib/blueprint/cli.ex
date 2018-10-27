@@ -36,8 +36,13 @@ defmodule Blueprint.CLI do
         """
     end
     defp get_docs(module) when is_atom(module) do
-        { _, doc } = Code.get_docs(module, :moduledoc)
-        doc
+        if Version.match?(System.version, "> 1.7.0") do
+            { :docs_v1, _, :elixir, "text/markdown", %{ "en" => doc }, _, _ } = Code.fetch_docs(module)
+            doc
+        else
+            { _, doc } = Code.get_docs(module, :moduledoc)
+            doc
+        end
     end
     defp get_docs(_), do: get_docs(__MODULE__)
 
